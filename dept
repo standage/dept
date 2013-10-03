@@ -1,0 +1,96 @@
+#!/usr/bin/env perl
+ 
+# Copyright (c) 2013, Daniel S. Standage <daniel.standage@gmail.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+use strict;
+use warnings;
+use Getopt::Long;
+use List::Util qw(shuffle);
+
+my $numsamples = 4;
+my $numperms   = 5;
+my $outformat  = "perm%d.dat";
+
+GetOptions
+(
+  "h|help"       => sub { print_usage(\*STDOUT); exit(0); },
+  "o|outfmt=s"   => \$outformat,
+  "p|nperms=i"   => \$numperms,
+  "s|nsamples=i" => \$numsamples,
+);
+my $infile = shift(@ARGV);
+unless($infile)
+{
+  print(STDERR "error: please provide an input file\n");
+  print_usage(\*STDERR);
+  exit(1);
+}
+
+print STDERR "[dept] generating $numperms permutations.\n";
+foreach my $perm(1..$numperms)
+{
+  my $outfile = sprintf($outformat, $perm);
+  open(my $OUT, ">", $outfile) or die("error opening file '$outfile'");
+
+  my @sampleorder = shuffle(1..$numsamples);
+  open(my $IN, "<", $infile) or die("error opening file '$infile'");
+  while(my $line = <$IN>)
+  {
+    chomp($line);
+    my @values = split(/\t/, $line);
+    if(scalar(@values) != $numsamples + 1)
+    {
+      printf(STDERR "error: line has %d values, expected %d\n",
+             scalar(@values), $numsamples + 1);
+      exit(1);
+    }
+
+    my @newvalues;
+    $newvalues[0] = $values[0];
+    foreach my $i(1..$numsamples)
+    {
+      $newvalues[$i] = $values[$sampleorder[$i-1]];
+    }
+    print $OUT join("\t", @newvalues), "\n";
+  }
+  close($OUT);
+  close($IN);
+  print(STDERR "[dept] permutation %2d complete!\n", $perm);
+}
+
+sub print_usage
+{
+  my $OUT = shift(@_);
+  print $OUT "
+DEPT: differential expression permutation testing
+
+Given a matrix of expression levels corresponding to a pairwise differential
+expression analysis, generate files with shuffled columns to facilitate
+permutation testing
+
+Usage: dept [options] infile
+  Options:
+    -h|--help             print this help message and exit
+    -o|--outfmt=STRING    printf-style format string for output file names;
+                          printf will be called on this format string and
+                          provided with a single integer argument (a unique
+                          integer ID corresponding to each permutation); default
+                          is 'perm%d.dat'
+    -p|--nperms=INT       the number of permutations to perform on the input
+                          data; default is 5
+    -s|--nsamples=INT     the total number of samples; default is 4
+
+";
+}
