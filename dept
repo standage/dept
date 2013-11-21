@@ -67,7 +67,7 @@ foreach my $perm(1..$numperms)
   }
   close($OUT);
   close($IN);
-  print(STDERR "[dept] permutation %2d complete!\n", $perm);
+  printf(STDERR "[dept] permutation %2d complete!\n", $perm);
 }
 
 sub print_usage
