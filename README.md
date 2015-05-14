@@ -28,3 +28,8 @@ used for DE packages). The output of DEPT is a set of new files containing the
 original matrix with the columns shuffled. You can perform your permutation test
 by running your DE pipeline with each of these shuffled files and comparing the
 results to the original results.
+
+The following terminal recording gives a basic demo of what `dept` is doing
+under the hood.
+
+[![asciicast](https://asciinema.org/a/5714.png)](https://asciinema.org/a/5714)
