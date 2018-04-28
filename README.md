@@ -2,7 +2,7 @@
 
 ### Overview
 
-The application of high-thoughput sequencing technologies to cDNA samples has
+The application of high-throughput sequencing technologies to cDNA samples has
 revolutionized the way gene expression is measured. However, despite exciting
 advances in technology, algorithms, and statistical models, differential
 expression analysis remains a significant challenge. Try 3 different DE analysis
